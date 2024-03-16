@@ -4,6 +4,7 @@ import os
 
 from clickhouse_connect.driver.client import Client
 from dataclasses import dataclass
+from dotenv import load_dotenv
 # Set read formats to customize data output from Clickhouse
 # https://clickhouse.com/docs/en/integrations/python#read-format-options-python-types
 from clickhouse_connect.datatypes.format import set_read_format
@@ -25,6 +26,7 @@ class Queries:
     purpose of this class is to categorize different queries by table and make it easier to automate broad filters such as
     network and number of days to query from. 
     """
+    load_dotenv()
     # Create ClickHouse client
     client: Client = clickhouse_connect.get_client(
         host=os.environ.get("HOST"),
@@ -184,4 +186,3 @@ class Queries:
                 AND meta_network_name = '{network}'
                 """
                 return self.client.query_df(query)
-
