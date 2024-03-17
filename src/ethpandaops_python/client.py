@@ -35,6 +35,54 @@ class Queries:
         secure=True,
     )
 
+    def canonical_beacon_block_execution_transaction(self, all_cols: str = 'blobs', time: int = 7, network: str = 'mainnet', type: int = 3) -> pd.DataFrame:
+        """
+        Queries that utilize data captured by Xatu Cannon, which collect execution layer transaction data from the beacon chain.
+        - https://dbt.platform.ethpandaops.io/#!/source/source.xatu.clickhouse.canonical_beacon_block_execution_transaction
+        """
+        match all_cols:
+            case 'blobs':
+                query = f"""
+                SELECT
+                    slot_start_date_time,
+                    event_date_time as block_process_time,
+                    slot,
+                    epoch,
+                    hash,
+                    blob_hashes,
+                    length(blob_hashes) as blob_hashes_length,
+                    type,
+                    gas_price,
+                    gas,
+                    size,
+                    call_data_size,
+                    gas_tip_cap as priority_fee,
+                    gas_fee_cap as max_fee_per_gas,
+                    blob_gas,
+                    blob_gas_fee_cap,
+                    meta_network_name
+                FROM canonical_beacon_block_execution_transaction
+                WHERE event_date_time > NOW() - INTERVAL '{time} DAYS'
+                AND type = {type} AND meta_network_name = '{network}'
+                ORDER BY slot DESC
+                """
+                return self.client.query_df(query)
+            case 'all':
+                query = f"""
+                    SELECT * FROM canonical_beacon_block_execution_transaction
+                    WHERE event_date_time > NOW() - INTERVAL '{time} DAYS'
+                    AND meta_network_name = '{network}'
+                    """
+                return self.client.query_df(query)
+            case 'sample':
+                query = f"""
+                    SELECT * FROM canonical_beacon_block_execution_transaction
+                    WHERE event_date_time > NOW() - INTERVAL '{time} DAYS'
+                    AND meta_network_name = '{network}'
+                    LIMIT 1000
+                    """
+                return self.client.query_df(query)
+
     def mempool_transaction(self,
                             all_cols: str = 'blobs',
                             time: int = 7,
