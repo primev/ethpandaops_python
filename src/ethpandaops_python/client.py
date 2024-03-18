@@ -1,4 +1,5 @@
 import clickhouse_connect
+import panel as pn
 import pandas as pd
 import os
 
@@ -35,6 +36,7 @@ class Queries:
         secure=True,
     )
 
+    @pn.cache(to_disk=True)
     def canonical_beacon_block_execution_transaction(self, all_cols: str = 'blobs', time: int = 7, network: str = 'mainnet', type: int = 3) -> pd.DataFrame:
         """
         Queries that utilize data captured by Xatu Cannon, which collect execution layer transaction data from the beacon chain.
@@ -83,6 +85,7 @@ class Queries:
                     """
                 return self.client.query_df(query)
 
+    @pn.cache(to_disk=True)
     def mempool_transaction(self,
                             all_cols: str = 'blobs',
                             time: int = 7,
@@ -134,6 +137,7 @@ class Queries:
                     """
                 return self.client.query_df(query).drop('meta_labels', axis=1)
 
+    @pn.cache(to_disk=True)
     def canonical_beacon_chain(self,
                                all_cols: str = 'block_blobs',
                                time: int = 7,
@@ -206,6 +210,7 @@ class Queries:
                 """
                 return self.client.query_df(query)
 
+    @pn.cache(to_disk=True)
     def blob_propagation(self,
                          all_cols: str = 'blob_propagation',
                          time: int = 7,
