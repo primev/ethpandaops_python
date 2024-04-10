@@ -8,89 +8,94 @@
 #   with-sources: false
 
 -e file:.
-bleach==6.1.0
-    # via panel
-bokeh==3.3.4
-    # via panel
+asttokens==2.4.1
+    # via stack-data
 certifi==2024.2.2
     # via clickhouse-connect
-    # via requests
-charset-normalizer==3.3.2
-    # via requests
-clickhouse-connect==0.7.2
+clickhouse-connect==0.7.6
     # via ethpandaops-python
-contourpy==1.2.0
-    # via bokeh
-diskcache==5.6.3
+comm==0.2.2
+    # via ipykernel
+debugpy==1.8.1
+    # via ipykernel
+decorator==5.1.1
+    # via ipython
+executing==2.0.1
+    # via stack-data
+ipykernel==6.29.4
     # via ethpandaops-python
-idna==3.6
-    # via requests
-jinja2==3.1.3
-    # via bokeh
-linkify-it-py==2.0.3
-    # via panel
+ipython==8.23.0
+    # via ipykernel
+jedi==0.19.1
+    # via ipython
+jupyter-client==8.6.1
+    # via ipykernel
+jupyter-core==5.7.2
+    # via ipykernel
+    # via jupyter-client
 lz4==4.3.3
     # via clickhouse-connect
-markdown==3.6
-    # via panel
-markdown-it-py==3.0.0
-    # via mdit-py-plugins
-    # via panel
-markupsafe==2.1.5
-    # via jinja2
-mdit-py-plugins==0.4.0
-    # via panel
-mdurl==0.1.2
-    # via markdown-it-py
+matplotlib-inline==0.1.6
+    # via ipykernel
+    # via ipython
+nest-asyncio==1.6.0
+    # via ipykernel
 numpy==1.26.4
-    # via bokeh
-    # via contourpy
     # via pandas
+    # via pyarrow
 packaging==24.0
-    # via bokeh
+    # via ipykernel
 pandas==2.2.1
-    # via bokeh
-    # via panel
-panel==1.3.8
     # via ethpandaops-python
-param==2.0.2
-    # via panel
-    # via pyviz-comms
-pillow==10.2.0
-    # via bokeh
+parso==0.8.3
+    # via jedi
+pexpect==4.9.0
+    # via ipython
+platformdirs==4.2.0
+    # via jupyter-core
+prompt-toolkit==3.0.43
+    # via ipython
+psutil==5.9.8
+    # via ipykernel
+ptyprocess==0.7.0
+    # via pexpect
+pure-eval==0.2.2
+    # via stack-data
+pyarrow==15.0.2
+    # via ethpandaops-python
+pygments==2.17.2
+    # via ipython
 python-dateutil==2.9.0.post0
+    # via jupyter-client
     # via pandas
 python-dotenv==1.0.1
     # via ethpandaops-python
 pytz==2024.1
     # via clickhouse-connect
     # via pandas
-pyviz-comms==3.0.1
-    # via panel
-pyyaml==6.0.1
-    # via bokeh
-requests==2.31.0
-    # via panel
+pyzmq==25.1.2
+    # via ipykernel
+    # via jupyter-client
 six==1.16.0
-    # via bleach
+    # via asttokens
     # via python-dateutil
+stack-data==0.6.3
+    # via ipython
 tornado==6.4
-    # via bokeh
-tqdm==4.66.2
-    # via panel
-typing-extensions==4.10.0
-    # via panel
+    # via ipykernel
+    # via jupyter-client
+traitlets==5.14.2
+    # via comm
+    # via ipykernel
+    # via ipython
+    # via jupyter-client
+    # via jupyter-core
+    # via matplotlib-inline
 tzdata==2024.1
     # via pandas
-uc-micro-py==1.0.3
-    # via linkify-it-py
 urllib3==2.2.1
     # via clickhouse-connect
-    # via requests
-webencodings==0.5.1
-    # via bleach
-xyzservices==2023.10.1
-    # via bokeh
-    # via panel
+wcwidth==0.2.13
+    # via prompt-toolkit
 zstandard==0.22.0
     # via clickhouse-connect
