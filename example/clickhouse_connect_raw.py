@@ -1,6 +1,5 @@
 import clickhouse_connect
 import pandas as pd
-import polars as pl
 import os
 
 # Set read formats to customize data output from Clickhouse
@@ -26,7 +25,19 @@ client = clickhouse_connect.get_client(
 )
 
 # Execute the query and return as a pandas dataframe
-query = "SELECT * FROM mempool_transaction WHERE event_date_time > NOW() - INTERVAL '1 HOUR' LIMIT 1000"
+query: str = """
+SELECT 
+    slot,
+    slot_start_date_time,
+    epoch,
+    epoch_start_date_time,
+    meta_client_name,
+    meta_network_name,
+    meta_consensus_implementation,
+    meta_consensus_version,
+FROM beacon_api_slot 
+WHERE slot_start_date_time > NOW() - INTERVAL '1 HOUR'
+"""
 results: pd.DataFrame = client.query_df(query)
 
 print(results.shape)
