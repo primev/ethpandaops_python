@@ -7,7 +7,7 @@ from ethpandaops_python.client import Queries
 @dataclass
 class Preprocessor:
     """
-    `Preprocessor` applies transformations and calculations on the data before it is used for analysis. 
+    `Preprocessor` applies transformations and calculations on the data before it is used for analysis.
     Data will be fetched from client.py and then preprocessed using this class.
     """
     # default address is Base. Replace this address to filter for a specific address
@@ -32,7 +32,7 @@ class Preprocessor:
         canonical_beacon_blob_sidecar_df: pl.DataFrame = pl.from_pandas(
             data["canonical_beacon_blob_sidecar_df"])
 
-        # preprocess logic
+        # preprocessing
         blob_mempool_table = (
             mempool_df
             .rename({"blob_hashes": "versioned_hash"})
@@ -74,7 +74,6 @@ class Preprocessor:
             .sort(by="submission_count")
         )
 
-        # prepare for join - explode blob hashes
         canonical_sidecar_df = canonical_beacon_blob_sidecar_df.drop(
             "blob_index")
 
@@ -83,10 +82,8 @@ class Preprocessor:
                 # .explode() separates all blob versioned hashes from a list[str] to single str rows
                 blob_mempool_table.explode("versioned_hash")
                 .with_columns(pl.col("versioned_hash").cast(pl.String))
-                .drop("event_date_time_max")
             )
             .join(canonical_sidecar_df, on="versioned_hash", how="left")
-            .sort(by="slot")
             .unique()
             .with_columns(
                 # divide by 1000 to convert from ms to s
@@ -100,5 +97,24 @@ class Preprocessor:
                 .abs()
                 .ceil()
                 .alias("num_slot_inclusion")
+            )
+            .sort(by="slot_start_date_time")
+            .with_columns(
+                # calculate rolling average
+                pl.col("num_slot_inclusion")
+                .rolling_mean(50)
+                .alias("rolling_num_slot_inclusion_50"),
+                # add base inclusion target
+                pl.lit(2).alias("base_line_2_slots"),
+            )
+
+            # rename columns for niceness
+            .rename(
+                {
+                    "slot_start_date_time": "slot time",
+                    "num_slot_inclusion": "slot inclusion rate",
+                    "rolling_num_slot_inclusion_50": "slot inclusion rate (50 blob average)",
+                    "base_line_2_slots": "slot target inclusion rate (2 slots)",
+                }
             )
         )
