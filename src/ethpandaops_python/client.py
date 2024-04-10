@@ -35,6 +35,77 @@ class Queries:
         secure=True,
     )
 
+    def slot_inclusion_query(
+        self,
+        blob_producer: str,
+        n_days: int,
+        network: str,
+    ) -> dict[str: pd.DataFrame]:
+        """
+        slot_inclusion_query() makes queries to the Ethpandaops clickhouse instance to get mempool and canonical beacon block sidecar data for a specific rollup.
+
+        Returns a dictionary formatted as:
+
+        {'mempool_df': mempool_df,
+        'canonical_beacon_blob_sidecar_df': canonical_beacon_blob_sidecar_df,
+        }
+        """
+
+        # query mempool data
+        mempool_query = f"""
+        SELECT
+            # MIN(event_date_time) AS earliest_event_date_time, -- not sure if I want this for now.
+            event_date_time,
+            type,
+            blob_sidecars_size,
+            blob_sidecars_empty_size,
+            hash,
+            to,
+            from,
+            blob_hashes,
+            nonce,
+            meta_network_name,
+            length(blob_hashes) as blob_hashes_length,
+            ROUND(100 - (blob_sidecars_empty_size / blob_sidecars_size) * 100, 2) AS fill_percentage,
+            blob_gas,
+            blob_gas_fee_cap,
+            gas_price,
+            gas_tip_cap,
+            gas_fee_cap
+        FROM mempool_transaction
+        WHERE event_date_time > NOW() - INTERVAL '{n_days} DAYS'
+        AND type = 3
+        AND meta_network_name = '{network}'
+        AND from = '{blob_producer}'
+        # GROUP BY hash, type, blob_sidecars_size, blob_sidecars_empty_size, blob_hashes, nonce, meta_network_name, blob_hashes_length, fill_percentage, to, from
+        """
+
+        # query canonical beacon block sidecar data
+        canonical_beacon_blob_sidecar_query = f"""
+        SELECT
+            slot,
+            slot_start_date_time,
+            block_root,
+            kzg_commitment,
+            meta_network_name,
+            blob_index,
+            versioned_hash,
+            blob_size,
+            blob_empty_size
+        FROM canonical_beacon_blob_sidecar
+        WHERE event_date_time > NOW() - INTERVAL '{n_days} DAYS'
+        """
+
+        # query dfs and return polars dataframes
+        mempool_df: pd.DataFrame = self.client.query_df(mempool_query)
+        canonical_beacon_blob_sidecar_df: pd.DataFrame = self.client.query_df(
+            canonical_beacon_blob_sidecar_query)
+
+        return {
+            "mempool_df": mempool_df,
+            "canonical_beacon_blob_sidecar_df": canonical_beacon_blob_sidecar_df,
+        }
+
     def canonical_beacon_block_execution_transaction(self, all_cols: str = 'blobs', time: int = 7, network: str = 'mainnet', type: int = 3) -> pd.DataFrame:
         """
         Queries that utilize data captured by Xatu Cannon, which collect execution layer transaction data from the beacon chain.
