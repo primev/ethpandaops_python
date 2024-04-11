@@ -14,7 +14,7 @@ class Preprocessor:
     blob_producer: str = '0x5050F69a9786F081509234F1a7F4684b5E5b76C9'
     # default time period, in days
     period: int = 1
-    query_engine: Queries = field(default_factory=Queries)
+    clickhouse_client: Queries = field(default_factory=Queries)
     network: str = "mainnet"
 
     def slot_inclusion(self) -> pl.DataFrame:
@@ -24,7 +24,7 @@ class Preprocessor:
         Returns a pl.DataFrame
         """
         # query data
-        data: dict[str] = self.query_engine.slot_inclusion_query(
+        data: dict[str] = self.clickhouse_client.slot_inclusion_query(
             blob_producer=self.blob_producer, n_days=self.period, network=self.network)
 
         # convert pandas to polars df
