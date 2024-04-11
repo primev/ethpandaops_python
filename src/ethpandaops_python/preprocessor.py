@@ -40,9 +40,6 @@ class Preprocessor:
             .group_by(
                 (
                     pl.col("versioned_hash").cast(pl.List(pl.Categorical)),
-                    "hash",
-                    "from",
-                    "to",
                     "nonce",
                 )
             )
@@ -65,6 +62,10 @@ class Preprocessor:
                     pl.col("gas_price").mean(),
                     pl.col("gas_tip_cap").mean(),
                     pl.col("gas_fee_cap").mean(),
+                    # tx info
+                    pl.col('hash').last(),
+                    pl.col('from').last(),
+                    pl.col('to').last(),
                 ]
             )
             .with_columns(
