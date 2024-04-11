@@ -15,33 +15,59 @@ class Hypersync:
     blocks: List[hypersync.BlockField] = field(default_factory=list)
 
     async def fetch_data(self, address: str, period: int) -> None:
+        """
+        Asynchronously fetches blockchain data for a specified address over a given period.
+
+        This method queries transactions and blocks from the blockchain starting from the
+        current block height and going backwards in time, for the duration of the specified period.
+
+        Parameters:
+        - address (str): The blockchain address to fetch transactions for.
+        - period (int): The period over which to fetch data, measured in blocks. The method
+                        calculates the starting block as the current height minus the product
+                        of period and an estimated number of blocks per hour (assuming 7200).
+
+        Note: This function updates the `self.transactions` and `self.blocks` lists with the fetched data.
+        """
+
+        # Get the current block height from the blockchain.
         height = await self.client.get_height()
 
+        # Define the query to fetch transactions and blocks. The starting block is calculated
+        # based on the given period and an assumption of 7200 blocks per hour.
         query = hypersync.Query(
-            from_block=height - (period * 7200),
+            from_block=height - (period * 7200),  # Calculate starting block.
             transactions=[
                 hypersync.TransactionSelection(
-                    from_=["0x5050f69a9786f081509234f1a7f4684b5e5b76c9"]
+                    # Specify the address to fetch transactions from.
+                    from_=[address]
                 )
             ],
             field_selection=hypersync.FieldSelection(
+                # Select transaction fields to fetch.
                 transaction=[el.value for el in TransactionField],
+                # Select block fields to fetch.
                 block=[el.value for el in BlockField],
             ),
         )
 
+        # Continuously fetch data until the end of the specified period is reached.
         while True:
+            # Send the query to the blockchain client.
             res = await self.client.send_req(query)
 
+            # Append the fetched transactions and blocks to their respective lists.
             self.transactions += res.data.transactions
             self.blocks += res.data.blocks
 
+            # Check if the fetched data has reached the current archive height or next block.
             if res.archive_height < res.next_block:
-                # Quit if reached the tip (consider adding a delay with asyncio.sleep if you wish to poll)
+                # Exit the loop if the end of the period (or the blockchain's current height) is reached.
                 break
 
+            # Update the query to fetch the next set of data starting from the next block.
             query.from_block = res.next_block
-            print("Scanned up to block " + str(query.from_block))
+            print(f"Scanned up to block {query.from_block}")  # Log progress.
 
     def convert_hex_to_float(self, hex: str) -> float:
         """
@@ -59,6 +85,15 @@ class Hypersync:
             return float(int(hex, 16))
 
     def query_txs(self, address: str, period: int) -> pl.DataFrame:
+        """ Query transactions for a given address and period.
+
+         Parameters:
+         - address (str): The blockchain address to query transactions for.
+         - period (int): The time period over which transactions should be queried.
+
+         Returns:
+         - A DataFrame containing transaction details for the specified address and period.
+        """
         asyncio.run(self.fetch_data(address=address, period=period))
 
         data = []
