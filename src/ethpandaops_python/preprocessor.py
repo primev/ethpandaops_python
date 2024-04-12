@@ -161,3 +161,69 @@ class Preprocessor:
             )
             .select("1_slot", "2_slots", "3_plus_slots")[0]
         )
+
+    def create_slot_gas_bidding_df(self) -> pl.DataFrame:
+        """
+        join slot inclusion transformation with tx data to get gas bidding info
+        """
+        slot_inclusion_df = self.create_slot_inclusion_df()
+
+        joined_df = (
+            slot_inclusion_df
+            .join(
+                self.cached_data['txs'], on="hash", how="left"
+            ).with_columns(
+                (pl.col("effective_gas_price") / 10**9)
+                .round(3)
+                .alias(
+                    "effective_gas_price_gwei"
+                ),  # gas price in gwei that was paid, including priority fee
+                (pl.col("max_fee_per_gas") / 10**9)
+                .round(3)
+                .alias(
+                    "max_fee_per_gas_gwei"
+                ),  # max gas price in gwei that rollup is willing to pay
+                (pl.col("max_priority_fee_per_gas") / 10**9).round(3)
+                # priority gas fee in gwei,
+                .alias("max_priority_fee_per_gas_gwei"),
+            ).with_columns(
+                (
+                    (pl.col("max_priority_fee_per_gas_gwei") /
+                     pl.col("effective_gas_price_gwei"))
+                    * 100
+                )
+                .round(3)
+                .alias("priority_fee_bid_percent_premium")
+            )
+            .select(
+                "block_number",
+                "max_priority_fee_per_gas_gwei",
+                "effective_gas_price_gwei",
+                "priority_fee_bid_percent_premium",
+                "slot inclusion rate",
+                "submission_count",
+            )
+            .unique()
+            .sort(by="block_number")
+            .with_columns(
+                (
+                    # estimate min block gas by taking the gwei paid minus the priority fee
+                    pl.col("effective_gas_price_gwei")
+                    - pl.col("max_priority_fee_per_gas_gwei")
+                ).alias("min_block_gas_gwei")
+            )
+            .with_columns(
+                # calculate per tx gas fluctuations
+                pl.col("min_block_gas_gwei")
+                .diff()
+                .abs()
+                .alias("gas_fluctuation_gwei")
+            )
+            .with_columns(
+                (pl.col("gas_fluctuation_gwei") / pl.col("min_block_gas_gwei") * 100).alias(
+                    "gas_fluctuation_percent"
+                )
+            )
+        )
+
+        return joined_df
