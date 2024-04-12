@@ -10,21 +10,13 @@ preprocessor: Preprocessor = Preprocessor(
 
 
 # get preprocessed data
-slot_inclusion_df: pl.DataFrame = preprocessor.slot_inclusion()
+slot_inclusion_df: pl.DataFrame = preprocessor.create_slot_inclusion_df()
 
-
-# number of rows
-print(slot_inclusion_df.shape)
-# columns and datatypes
-print(slot_inclusion_df.dtypes)
-
-# df output sample of all data
-print(slot_inclusion_df.head(10))
-# ! - note that the head of data has some nulls because the mempool data and beacon chain data are not 100% synced up.
-# df output with selected columns
-print(slot_inclusion_df.drop_nulls().select('slot time', 'slot inclusion rate',
-      'slot inclusion rate (50 blob average)', 'slot target inclusion rate (2 slots)').head(10))
-
-# json output
-print(slot_inclusion_df.drop_nulls().select('slot time', 'slot inclusion rate',
+# json output for time series
+print(slot_inclusion_df.select('slot time', 'slot inclusion rate',
       'slot inclusion rate (50 blob average)', 'slot target inclusion rate (2 slots)').head(10).to_dicts())
+
+slot_count_breakdown_df: pl.DataFrame = preprocessor.create_slot_count_breakdown_df()
+
+# json output for slot count breakdown barchart/pie chart
+print(slot_count_breakdown_df.to_dict())
