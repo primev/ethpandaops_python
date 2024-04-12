@@ -1,4 +1,3 @@
-import pandas as pd
 import polars as pl
 from dataclasses import dataclass, field
 from ethpandaops_python.client import Queries
@@ -8,7 +7,8 @@ from ethpandaops_python.client import Queries
 class Preprocessor:
     """
     `Preprocessor` applies transformations and calculations on the data before it is used for analysis.
-    Data will be fetched from client.py and then preprocessed using this class.
+    Data is automatically fetched at instantiation and stored in memory in a dict[str] of dataframes. This makes the same data reusable throughout the class for multiple
+    transformations.
     """
     # default address is Base. Replace this address to filter for a specific address
     blob_producer: str = '0x5050F69a9786F081509234F1a7F4684b5E5b76C9'
@@ -17,24 +17,34 @@ class Preprocessor:
     clickhouse_client: Queries = field(default_factory=Queries)
     network: str = "mainnet"
 
+    cached_data: dict[str] = field(default_factory=dict)
+
+    def __post_init__(self):
+        data: dict[str] = self.clickhouse_client.slot_inclusion_query(
+            blob_producer=self.blob_producer, n_days=self.period, network=self.network)
+
+        self.cached_data['mempool_df'] = pl.from_pandas(data['mempool_df'])
+        self.cached_data['canonical_beacon_blob_sidecar_df'] = pl.from_pandas(
+            data['canonical_beacon_blob_sidecar_df'])
+
     def slot_inclusion(self) -> pl.DataFrame:
         """
         `slot_inclusion` returns the slot, slot inclusion time, and slot start time for the last `time` days.
 
         Returns a pl.DataFrame
         """
-        # query data
-        data: dict[str] = self.clickhouse_client.slot_inclusion_query(
-            blob_producer=self.blob_producer, n_days=self.period, network=self.network)
+        # # query data
+        # data: dict[str] = self.clickhouse_client.slot_inclusion_query(
+        #     blob_producer=self.blob_producer, n_days=self.period, network=self.network)
 
         # convert pandas to polars df
-        mempool_df: pl.DataFrame = pl.from_pandas(data["mempool_df"])
-        canonical_beacon_blob_sidecar_df: pl.DataFrame = pl.from_pandas(
-            data["canonical_beacon_blob_sidecar_df"])
+        # mempool_df: pl.DataFrame = pl.from_pandas(data["mempool_df"])
+        # canonical_beacon_blob_sidecar_df: pl.DataFrame = pl.from_pandas(
+        #     data["canonical_beacon_blob_sidecar_df"])
 
         # preprocessing
-        blob_mempool_table = (
-            mempool_df
+        blob_mempool_table: pl.DataFrame = (
+            self.cached_data['mempool_df']
             .rename({"blob_hashes": "versioned_hash"})
             .sort(by="event_date_time")
             .group_by(
@@ -75,7 +85,7 @@ class Preprocessor:
             .sort(by="submission_count")
         )
 
-        canonical_sidecar_df = canonical_beacon_blob_sidecar_df.drop(
+        canonical_sidecar_df: pl.DataFrame = self.cached_data['canonical_beacon_blob_sidecar_df'].drop(
             "blob_index")
 
         return (
@@ -118,4 +128,5 @@ class Preprocessor:
                     "base_line_2_slots": "slot target inclusion rate (2 slots)",
                 }
             )
+            .drop_nulls()
         )
