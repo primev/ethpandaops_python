@@ -1,6 +1,7 @@
 import polars as pl
 from dataclasses import dataclass, field
 from ethpandaops_python.client import Queries
+from ethpandaops_python.hypersync import Hypersync
 
 
 @dataclass
@@ -15,17 +16,23 @@ class Preprocessor:
     # default time period, in days
     period: int = 1
     clickhouse_client: Queries = field(default_factory=Queries)
+    hypersync_client: Hypersync = field(default_factory=Hypersync)
     network: str = "mainnet"
 
     cached_data: dict[str] = field(default_factory=dict)
 
     def __post_init__(self):
+        # query clickhouse data
         data: dict[str] = self.clickhouse_client.slot_inclusion_query(
             blob_producer=self.blob_producer, n_days=self.period, network=self.network)
 
         self.cached_data['mempool_df'] = pl.from_pandas(data['mempool_df'])
         self.cached_data['canonical_beacon_blob_sidecar_df'] = pl.from_pandas(
             data['canonical_beacon_blob_sidecar_df'])
+
+        # query hypersync data
+        self.cached_data['txs'] = self.hypersync_client.query_txs(
+            address=self.blob_producer, period=self.period)
 
     def create_slot_inclusion_df(self) -> pl.DataFrame:
         """
@@ -113,16 +120,20 @@ class Preprocessor:
             # rename columns for niceness
             .rename(
                 {
-                    "slot_start_date_time": "slot time",
-                    "num_slot_inclusion": "slot inclusion rate",
-                    "rolling_num_slot_inclusion_50": "slot inclusion rate (50 blob average)",
-                    "base_line_2_slots": "slot target inclusion rate (2 slots)",
+                    "slot_start_date_time": "slot _time",
+                    "num_slot_inclusion": "slot_inclusion _rate",
+                    "rolling_num_slot_inclusion_50": "slot_inclusion_rate_50_blob_avg",
+                    "base_line_2_slots": "2_slot_target_inclusion_rate",
                 }
             )
             .drop_nulls()
         )
 
     def create_slot_count_breakdown_df(self) -> pl.DataFrame:
+        """
+        breakdown slot inclusion rate into three groups:
+        1 slot, 2 slot, 3+ slots
+        """
         slot_inclusion_df = self.create_slot_inclusion_df()
 
         return (
@@ -148,5 +159,5 @@ class Preprocessor:
                 pl.col("2 slots").sum(),
                 pl.col("3+ slots").sum(),
             )
-            .select("1 slot", "2 slots", "3+ slots")[0]
+            .select("1_slot", "2_slots", "3_plus_slots")[0]
         )
