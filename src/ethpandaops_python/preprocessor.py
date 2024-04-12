@@ -27,7 +27,7 @@ class Preprocessor:
         self.cached_data['canonical_beacon_blob_sidecar_df'] = pl.from_pandas(
             data['canonical_beacon_blob_sidecar_df'])
 
-    def slot_inclusion(self) -> pl.DataFrame:
+    def create_slot_inclusion_df(self) -> pl.DataFrame:
         """
         `slot_inclusion` returns the slot, slot inclusion time, and slot start time for the last `time` days.
 
@@ -129,4 +129,34 @@ class Preprocessor:
                 }
             )
             .drop_nulls()
+        )
+
+    def create_slot_count_breakdown_df(self) -> pl.DataFrame:
+        slot_inclusion_df = self.create_slot_inclusion_df()
+
+        return (
+            slot_inclusion_df
+            .select("hash", "slot inclusion rate")
+            .unique()
+            .with_columns(
+                pl.when(pl.col("slot inclusion rate") == 1)
+                .then(True)
+                .otherwise(False)
+                .alias("1 slot"),
+                pl.when(pl.col("slot inclusion rate") == 2)
+                .then(True)
+                .otherwise(False)
+                .alias("2 slots"),
+                pl.when(pl.col("slot inclusion rate") >= 3)
+                .then(True)
+                .otherwise(False)
+                .alias("3+ slots"),
+            )
+            .with_columns(
+                pl.col("1 slot").sum(),
+                pl.col("2 slots").sum(),
+                pl.col("3+ slots").sum(),
+                # pl.col('4+ slots').sum()
+            )
+            .select("1 slot", "2 slots", "3+ slots")[0]
         )
