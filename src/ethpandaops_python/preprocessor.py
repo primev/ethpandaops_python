@@ -120,8 +120,8 @@ class Preprocessor:
             # rename columns for niceness
             .rename(
                 {
-                    "slot_start_date_time": "slot _time",
-                    "num_slot_inclusion": "slot_inclusion _rate",
+                    "slot_start_date_time": "slot_time",
+                    "num_slot_inclusion": "slot_inclusion_rate",
                     "rolling_num_slot_inclusion_50": "slot_inclusion_rate_50_blob_avg",
                     "base_line_2_slots": "2_slot_target_inclusion_rate",
                 }
@@ -131,33 +131,33 @@ class Preprocessor:
 
     def create_slot_count_breakdown_df(self) -> pl.DataFrame:
         """
-        breakdown slot inclusion rate into three groups:
-        1 slot, 2 slot, 3+ slots
+        breakdown slot_inclusion_rate into three groups:
+        1_slot, 2 slot, 3_plus_slots
         """
         slot_inclusion_df = self.create_slot_inclusion_df()
 
         return (
             slot_inclusion_df
-            .select("hash", "slot inclusion rate")
+            .select("hash", "slot_inclusion_rate")
             .unique()
             .with_columns(
-                pl.when(pl.col("slot inclusion rate") == 1)
+                pl.when(pl.col("slot_inclusion_rate") == 1)
                 .then(True)
                 .otherwise(False)
-                .alias("1 slot"),
-                pl.when(pl.col("slot inclusion rate") == 2)
+                .alias("1_slot"),
+                pl.when(pl.col("slot_inclusion_rate") == 2)
                 .then(True)
                 .otherwise(False)
-                .alias("2 slots"),
-                pl.when(pl.col("slot inclusion rate") >= 3)
+                .alias("2_slots"),
+                pl.when(pl.col("slot_inclusion_rate") >= 3)
                 .then(True)
                 .otherwise(False)
-                .alias("3+ slots"),
+                .alias("3_plus_slots"),
             )
             .with_columns(
-                pl.col("1 slot").sum(),
-                pl.col("2 slots").sum(),
-                pl.col("3+ slots").sum(),
+                pl.col("1_slot").sum(),
+                pl.col("2_slots").sum(),
+                pl.col("3_plus_slots").sum(),
             )
             .select("1_slot", "2_slots", "3_plus_slots")[0]
         )
@@ -200,7 +200,7 @@ class Preprocessor:
                 "max_priority_fee_per_gas_gwei",
                 "effective_gas_price_gwei",
                 "priority_fee_bid_percent_premium",
-                "slot inclusion rate",
+                "slot_inclusion_rate",
                 "submission_count",
             )
             .unique()
@@ -224,6 +224,7 @@ class Preprocessor:
                     "gas_fluctuation_percent"
                 )
             )
+            .drop_nulls()
         )
 
         return joined_df
