@@ -13,10 +13,20 @@ preprocessor: Preprocessor = Preprocessor(
 slot_inclusion_df: pl.DataFrame = preprocessor.create_slot_inclusion_df()
 
 # json output for time series
-print(slot_inclusion_df.select('slot time', 'slot inclusion rate',
-      'slot inclusion rate (50 blob average)', 'slot target inclusion rate (2 slots)').head(10).to_dicts())
+print('\nslot inclusion time:')
+print(slot_inclusion_df.select('slot_time', 'slot_inclusion_rate',
+      'slot_inclusion_rate_50_blob_avg', '2_slot_target_inclusion_rate').head(10).to_dicts())
 
 slot_count_breakdown_df: pl.DataFrame = preprocessor.create_slot_count_breakdown_df()
 
 # json output for slot count breakdown barchart/pie chart
-print(slot_count_breakdown_df.to_dict())
+print('\nslot count breakdown:')
+print(slot_count_breakdown_df.to_dicts())
+
+# priority gas bidding
+print('\npriority gas bidding:')
+slot_gas_bidding_df: pl.DataFrame = preprocessor.create_slot_gas_bidding_df()
+print(slot_gas_bidding_df.head(5))
+
+
+print('done')
