@@ -33,16 +33,7 @@ class Preprocessor:
 
         Returns a pl.DataFrame
         """
-        # # query data
-        # data: dict[str] = self.clickhouse_client.slot_inclusion_query(
-        #     blob_producer=self.blob_producer, n_days=self.period, network=self.network)
 
-        # convert pandas to polars df
-        # mempool_df: pl.DataFrame = pl.from_pandas(data["mempool_df"])
-        # canonical_beacon_blob_sidecar_df: pl.DataFrame = pl.from_pandas(
-        #     data["canonical_beacon_blob_sidecar_df"])
-
-        # preprocessing
         blob_mempool_table: pl.DataFrame = (
             self.cached_data['mempool_df']
             .rename({"blob_hashes": "versioned_hash"})
@@ -156,7 +147,6 @@ class Preprocessor:
                 pl.col("1 slot").sum(),
                 pl.col("2 slots").sum(),
                 pl.col("3+ slots").sum(),
-                # pl.col('4+ slots').sum()
             )
             .select("1 slot", "2 slots", "3+ slots")[0]
         )
