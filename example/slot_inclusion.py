@@ -28,5 +28,8 @@ print('\npriority gas bidding:')
 slot_gas_bidding_df: pl.DataFrame = preprocessor.create_slot_gas_bidding_df()
 print(slot_gas_bidding_df.to_dicts()[:5])
 
-
+# priority gas bidding groupby
+print('\npriority gas bid premium mean:')
+slot_gas_bidding_groupby_df: pl.DataFrame = preprocessor.create_bid_premium_df()
+print(slot_gas_bidding_groupby_df.to_dicts())
 print('done')

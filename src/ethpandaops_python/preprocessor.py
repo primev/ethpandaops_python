@@ -228,3 +228,18 @@ class Preprocessor:
         )
 
         return joined_df
+
+    def create_bid_premium_df(self) -> pl.DataFrame:
+        """
+        Groupby on slot inclusion rate to get median priority fee bid percent premium and mean effective gas price
+        """
+        slot_gas_bidding_df = self.create_slot_gas_bidding_df()
+
+        return (slot_gas_bidding_df.group_by("slot_inclusion_rate")
+                .agg(
+            pl.col("priority_fee_bid_percent_premium").median(),
+            pl.col("effective_gas_price_gwei").mean(),
+        )
+            .sort(by="slot_inclusion_rate")
+            .drop_nulls()
+        )
