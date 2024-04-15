@@ -1,7 +1,7 @@
 [project]
 name = "ethpandaops-python"
 version = "0.3.0"
-description = "Collection of queries to access Xatu data"
+description = "Collection of pipelines to analyze Ethereum blob inclusion rates built with Xatu and Hypersync"
 authors = [{ name = "Evan K", email = "ekcopersonal@gmail.com" }]
 dependencies = [
     "clickhouse_connect>=0.7.2",
