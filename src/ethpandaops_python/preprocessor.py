@@ -2,6 +2,7 @@ import polars as pl
 from dataclasses import dataclass, field
 from ethpandaops_python.client import Queries
 from ethpandaops_python.hypersync import Hypersync
+from typing import Union, Dict
 
 
 @dataclass
@@ -11,8 +12,13 @@ class Preprocessor:
     Data is automatically fetched at instantiation and stored in memory in a dict[str] of dataframes. This makes the same data reusable throughout the class for multiple
     transformations.
     """
-    # default address is Base. Replace this address to filter for a specific address
-    blob_producer: str = '0x5050F69a9786F081509234F1a7F4684b5E5b76C9'
+    # blob_producer can be a string or a dictionary of addresses with keys indicating their use
+    blob_producer: Union[str, Dict[str, str]] = field(default_factory=lambda: {
+        'arbirum': '0xC1b634853Cb333D3aD8663715b08f41A3Aec47cc',
+        'base': '0x5050F69a9786F081509234F1a7F4684b5E5b76C9',
+        'optimism': '0x6887246668a3b87F54DeB3b94Ba47a6f63F32985'
+
+    })
     # default time period, in days
     period: int = 1
     clickhouse_client: Queries = field(default_factory=Queries)

@@ -5,6 +5,8 @@ import os
 from clickhouse_connect.driver.client import Client
 from dataclasses import dataclass
 from dotenv import load_dotenv
+from typing import Union, Dict
+
 # Set read formats to customize data output from Clickhouse
 # https://clickhouse.com/docs/en/integrations/python#read-format-options-python-types
 from clickhouse_connect.datatypes.format import set_read_format
@@ -37,12 +39,12 @@ class Queries:
 
     def slot_inclusion_query(
         self,
-        blob_producer: str,
+        blob_producer: Union[str, Dict[str, str]],
         n_days: int,
         network: str,
-    ) -> dict[str: pd.DataFrame]:
+    ) -> dict[str, pd.DataFrame]:
         """
-        slot_inclusion_query() makes queries to the Ethpandaops clickhouse instance to get mempool and canonical beacon block sidecar data for a specific rollup.
+        slot_inclusion_query() makes queries to the Ethpandaops Clickhouse instance to get mempool and canonical beacon block sidecar data for a specific rollup.
 
         Returns a dictionary formatted as:
 
@@ -51,10 +53,18 @@ class Queries:
         }
         """
 
-        # query mempool data
+        # Build query conditions based on blob_producer type
+        if isinstance(blob_producer, str):
+            blob_producer_condition = f"from = '{blob_producer}'"
+        elif isinstance(blob_producer, dict):
+            # Convert the dictionary values to a properly formatted SQL string
+            blob_producer_list = ", ".join(
+                f"'{addr}'" for addr in list(blob_producer.values()))
+            blob_producer_condition = f"from IN ({blob_producer_list})"
+
+        # Mempool query
         mempool_query = f"""
         SELECT
-            # MIN(event_date_time) AS earliest_event_date_time, -- not sure if I want this for now.
             event_date_time,
             type,
             blob_sidecars_size,
@@ -76,11 +86,10 @@ class Queries:
         WHERE event_date_time > NOW() - INTERVAL '{n_days} DAYS'
         AND type = 3
         AND meta_network_name = '{network}'
-        AND from = '{blob_producer}'
-        # GROUP BY hash, type, blob_sidecars_size, blob_sidecars_empty_size, blob_hashes, nonce, meta_network_name, blob_hashes_length, fill_percentage, to, from
+        AND {blob_producer_condition}
         """
 
-        # query canonical beacon block sidecar data
+        # Canonical beacon block sidecar query
         canonical_beacon_blob_sidecar_query = f"""
         SELECT
             slot,
@@ -96,10 +105,11 @@ class Queries:
         WHERE event_date_time > NOW() - INTERVAL '{n_days} DAYS'
         """
 
-        # query dfs and return polars dataframes
+        # Query dataframes
         mempool_df: pd.DataFrame = self.client.query_df(mempool_query)
         canonical_beacon_blob_sidecar_df: pd.DataFrame = self.client.query_df(
-            canonical_beacon_blob_sidecar_query)
+            canonical_beacon_blob_sidecar_query
+        )
 
         return {
             "mempool_df": mempool_df,

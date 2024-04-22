@@ -1,9 +1,12 @@
 from ethpandaops_python.preprocessor import Preprocessor
 import polars as pl
 
+blob_producers: dict[str] = {'optimism': '0x6887246668a3b87F54DeB3b94Ba47a6f63F32985',
+                             'base': '0x5050F69a9786F081509234F1a7F4684b5E5b76C9'
+                             }
 # instantiate a Preprocessor for Base blob data fora 1 day period
 preprocessor: Preprocessor = Preprocessor(
-    blob_producer='0x5050F69a9786F081509234F1a7F4684b5E5b76C9',  # base
+    # blob_producer=blob_producers,  # base
     period=1,     # 1 day
     network='mainnet'   # mainnet
 )
