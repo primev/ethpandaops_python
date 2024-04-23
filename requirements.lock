@@ -22,6 +22,8 @@ decorator==5.1.1
     # via ipython
 executing==2.0.1
     # via stack-data
+hypersync==0.5.7
+    # via ethpandaops-python
 ipykernel==6.29.4
     # via ethpandaops-python
 ipython==8.23.0
@@ -39,6 +41,7 @@ matplotlib-inline==0.1.6
     # via ipykernel
     # via ipython
 nest-asyncio==1.6.0
+    # via ethpandaops-python
     # via ipykernel
 numpy==1.26.4
     # via pandas
@@ -53,6 +56,8 @@ pexpect==4.9.0
     # via ipython
 platformdirs==4.2.0
     # via jupyter-core
+polars==0.20.22
+    # via ethpandaops-python
 prompt-toolkit==3.0.43
     # via ipython
 psutil==5.9.8
@@ -81,6 +86,8 @@ six==1.16.0
     # via python-dateutil
 stack-data==0.6.3
     # via ipython
+strenum==0.4.15
+    # via hypersync
 tornado==6.4
     # via ipykernel
     # via jupyter-client
