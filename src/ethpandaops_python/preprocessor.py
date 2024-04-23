@@ -13,11 +13,27 @@ class Preprocessor:
     transformations.
     """
     # blob_producer can be a string or a dictionary of addresses with keys indicating their use
-    blob_producer: Union[str, Dict[str, str]] = field(default_factory=lambda: {
-        'arbirum': '0xC1b634853Cb333D3aD8663715b08f41A3Aec47cc',
-        'base': '0x5050F69a9786F081509234F1a7F4684b5E5b76C9',
-        'optimism': '0x6887246668a3b87F54DeB3b94Ba47a6f63F32985'
-
+    blob_producer: Union[str, Dict[list[str], list[str]]] = field(default_factory=lambda: {
+        "sequencer_addresses": [
+            "0xC1b634853Cb333D3aD8663715b08f41A3Aec47cc",
+            "0x6887246668a3b87F54DeB3b94Ba47a6f63F32985",
+            "0x9228624C3185FCBcf24c1c9dB76D8Bef5f5DAd64",
+            "0x6667961f5e9C98A76a48767522150889703Ed77D",
+            "0xcF2898225ED05Be911D3709d9417e86E0b4Cfc8f",
+            "0x148Ee7dAF16574cD020aFa34CC658f8F3fbd2800",
+            "0x16D5783a96ab20c9157d7933ac236646B29589A4",
+            "0x5050F69a9786F081509234F1a7F4684b5E5b76C9",
+        ],
+        "sequencer_names": [
+            "arbitrum",
+            "optimism",
+            "linea",
+            "mantle",
+            "scroll",
+            "polygon_zkevm",
+            "starknet",
+            "base",
+        ],
     })
     # default time period, in days
     period: int = 1
@@ -28,9 +44,12 @@ class Preprocessor:
     cached_data: dict[str] = field(default_factory=dict)
 
     def __post_init__(self):
+        blob_producer = {name: address for name, address in zip(
+            self.blob_producer["sequencer_names"], self.blob_producer["sequencer_addresses"])}
+
         # query clickhouse data
         data: dict[str] = self.clickhouse_client.slot_inclusion_query(
-            blob_producer=self.blob_producer, n_days=self.period, network=self.network)
+            blob_producer=blob_producer, n_days=self.period, network=self.network)
 
         self.cached_data['mempool_df'] = pl.from_pandas(data['mempool_df'])
         self.cached_data['canonical_beacon_blob_sidecar_df'] = pl.from_pandas(
@@ -38,11 +57,13 @@ class Preprocessor:
 
         # query hypersync data
         self.cached_data['txs'] = self.hypersync_client.query_txs(
-            address=self.blob_producer, period=self.period)
+            address=blob_producer, period=self.period)
 
     def create_slot_inclusion_df(self) -> pl.DataFrame:
         """
         `slot_inclusion` returns the slot, slot inclusion time, and slot start time for the last `time` days.
+
+        This is the main query that all the other queries rely on for calculations.
 
         Returns a pl.DataFrame
         """
