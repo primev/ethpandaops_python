@@ -16,23 +16,23 @@ class Preprocessor:
     blob_producer: Union[str, Dict[list[str], list[str]]] = field(default_factory=lambda: {
         "sequencer_addresses": [
             "0xC1b634853Cb333D3aD8663715b08f41A3Aec47cc",
-            "0x6887246668a3b87F54DeB3b94Ba47a6f63F32985",
-            "0x9228624C3185FCBcf24c1c9dB76D8Bef5f5DAd64",
-            "0x6667961f5e9C98A76a48767522150889703Ed77D",
-            "0xcF2898225ED05Be911D3709d9417e86E0b4Cfc8f",
-            "0x148Ee7dAF16574cD020aFa34CC658f8F3fbd2800",
-            "0x16D5783a96ab20c9157d7933ac236646B29589A4",
             "0x5050F69a9786F081509234F1a7F4684b5E5b76C9",
+            "0x6887246668a3b87F54DeB3b94Ba47a6f63F32985",
+            "0xa9268341831eFa4937537bc3e9EB36DbecE83C7e",
+            "0xcF2898225ED05Be911D3709d9417e86E0b4Cfc8f",
+            "0x0D3250c3D5FAcb74Ac15834096397a3Ef790ec99",
+            "0x2c169dfe5fbba12957bdd0ba47d9cedbfe260ca7",
+            "0xcF2898225ED05Be911D3709d9417e86E0b4Cfc8f",
         ],
         "sequencer_names": [
             "arbitrum",
+            "base",
             "optimism",
             "linea",
-            "mantle",
             "scroll",
-            "polygon_zkevm",
+            "zksync",
             "starknet",
-            "base",
+            "scroll",
         ],
     })
     # default time period, in days
