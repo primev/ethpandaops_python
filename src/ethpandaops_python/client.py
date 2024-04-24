@@ -39,7 +39,7 @@ class Queries:
 
     def slot_inclusion_query(
         self,
-        blob_producer: Union[str, Dict[str, str]],
+        blob_producer: Union[str, Dict[list[str], list[str]]],
         n_days: int,
         network: str,
     ) -> dict[str, pd.DataFrame]:
@@ -59,7 +59,8 @@ class Queries:
         elif isinstance(blob_producer, dict):
             # Convert the dictionary values to a properly formatted SQL string
             blob_producer_list = ", ".join(
-                f"'{addr}'" for addr in list(blob_producer.values()))
+                f"'{addr}'" for addr in blob_producer['sequencer_names'])
+
             blob_producer_condition = f"from IN ({blob_producer_list})"
 
         # Mempool query

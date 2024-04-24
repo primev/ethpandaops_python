@@ -44,12 +44,12 @@ class Preprocessor:
     cached_data: dict[str] = field(default_factory=dict)
 
     def __post_init__(self):
-        blob_producer = {name: address for name, address in zip(
-            self.blob_producer["sequencer_names"], self.blob_producer["sequencer_addresses"])}
+        # blob_producer = {name: address for name, address in zip(
+        #     self.blob_producer["sequencer_names"], self.blob_producer["sequencer_addresses"])}
 
         # query clickhouse data
         data: dict[str] = self.clickhouse_client.slot_inclusion_query(
-            blob_producer=blob_producer, n_days=self.period, network=self.network)
+            blob_producer=self.blob_producer, n_days=self.period, network=self.network)
 
         self.cached_data['mempool_df'] = pl.from_pandas(data['mempool_df'])
         self.cached_data['canonical_beacon_blob_sidecar_df'] = pl.from_pandas(
@@ -57,7 +57,7 @@ class Preprocessor:
 
         # query hypersync data
         self.cached_data['txs'] = self.hypersync_client.query_txs(
-            address=blob_producer, period=self.period)
+            address=self.blob_producer['sequencer_addresses'], period=self.period)
 
     def create_slot_inclusion_df(self) -> pl.DataFrame:
         """

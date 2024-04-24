@@ -33,10 +33,6 @@ class Hypersync:
         # Get the current block height from the blockchain.
         height = await self.client.get_height()
 
-        # Convert 'address' to a list if it's a dictionary
-        if isinstance(address, dict):
-            address_list = list(address.values())
-
         # Define the query to fetch transactions and blocks. The starting block is calculated
         # based on the given period and an assumption of 7200 blocks per hour.
         query = hypersync.Query(
@@ -44,7 +40,7 @@ class Hypersync:
             transactions=[
                 hypersync.TransactionSelection(
                     # Specify the address to fetch transactions from.
-                    from_=address_list
+                    from_=address
                 )
             ],
             field_selection=hypersync.FieldSelection(
@@ -88,7 +84,7 @@ class Hypersync:
             # Convert hex string to float
             return float(int(hex, 16))
 
-    def query_txs(self, address: Union[str, Dict[str, str]], period: int) -> pl.DataFrame:
+    def query_txs(self, address: Union[str, Dict[list, list]], period: int) -> pl.DataFrame:
         """ Query transactions for a given address and period.
 
          Parameters:
