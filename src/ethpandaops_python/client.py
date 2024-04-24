@@ -26,7 +26,7 @@ class Queries:
     """
     `Queries` contains multiple query functions for different tables. The primary
     purpose of this class is to categorize different queries by table and make it easier to automate broad filters such as
-    network and number of days to query from. 
+    network and number of days to query from.
     """
     load_dotenv()
     # Create ClickHouse client
@@ -59,7 +59,7 @@ class Queries:
         elif isinstance(blob_producer, dict):
             # Convert the dictionary values to a properly formatted SQL string
             blob_producer_list = ", ".join(
-                f"'{addr}'" for addr in blob_producer['sequencer_names'])
+                f"'{addr}'" for addr in blob_producer['sequencer_addresses'])
 
             blob_producer_condition = f"from IN ({blob_producer_list})"
 
