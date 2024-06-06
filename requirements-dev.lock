@@ -6,6 +6,7 @@
 #   features: []
 #   all-features: false
 #   with-sources: false
+#   generate-hashes: false
 
 -e file:.
 asttokens==2.4.1
@@ -56,7 +57,7 @@ pexpect==4.9.0
     # via ipython
 platformdirs==4.2.0
     # via jupyter-core
-polars==0.20.22
+polars==0.20.31
     # via ethpandaops-python
 prompt-toolkit==3.0.43
     # via ipython
