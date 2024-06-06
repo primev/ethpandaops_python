@@ -9,7 +9,7 @@ dependencies = [
     "pyarrow>=15.0.2",
     "pandas>=2.2.1",
     "ipykernel>=6.29.4",
-    "polars>=0.20.19",
+    "polars>=0.20.31",
     "hypersync==0.5.7",
     "nest_asyncio>=1.6.0",
 ]
