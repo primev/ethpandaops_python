@@ -18,23 +18,26 @@ class Preprocessor:
             "0xC1b634853Cb333D3aD8663715b08f41A3Aec47cc",
             "0x5050F69a9786F081509234F1a7F4684b5E5b76C9",
             "0x6887246668a3b87F54DeB3b94Ba47a6f63F32985",
+            "0x000000633b68f5d8d3a86593ebb815b4663bcbe0",
+            "0x415c8893d514f9bc5211d36eeda4183226b84aa7",
             "0xa9268341831eFa4937537bc3e9EB36DbecE83C7e",
             "0xcF2898225ED05Be911D3709d9417e86E0b4Cfc8f",
             "0x0D3250c3D5FAcb74Ac15834096397a3Ef790ec99",
             "0x2c169dfe5fbba12957bdd0ba47d9cedbfe260ca7",
-            "0xcF2898225ED05Be911D3709d9417e86E0b4Cfc8f",
         ],
         "sequencer_names": [
             "arbitrum",
             "base",
             "optimism",
+            "taiko",
+            "blast",
             "linea",
             "scroll",
             "zksync",
             "starknet",
-            "scroll",
         ],
     })
+
     # default time period, in days
     period: int = 1
     clickhouse_client: Queries = field(default_factory=Queries)
