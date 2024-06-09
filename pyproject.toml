@@ -9,7 +9,7 @@ dependencies = [
     "pyarrow>=15.0.2",
     "pandas>=2.2.1",
     "polars==0.20.31",
-    "hypersync==0.7.2",
+    "hypersync==0.7.3",
     "nest_asyncio>=1.6.0",
 ]
 readme = "README.md"
