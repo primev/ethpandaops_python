@@ -11,7 +11,7 @@ class Hypersync:
     client: HypersyncClient = field(
         default_factory=lambda: HypersyncClient(
             hypersync.ClientConfig(
-                url='http://1.backup.hypersync.xyz'
+                # url='http://1.backup.hypersync.xyz'
             )
         )
     )
@@ -80,38 +80,6 @@ class Hypersync:
         )
 
         return await self.client.collect_parquet('data', query, config)
-
-        # # Continuously fetch data until the end of the specified period is reached.
-        # while True:
-        #     # Send the query to the blockchain client.
-        #     res = await self.client.send_req(query)
-
-        #     # Append the fetched transactions and blocks to their respective lists.
-        #     self.transactions += res.data.transactions
-        #     self.blocks += res.data.blocks
-
-        #     # Check if the fetched data has reached the current archive height or next block.
-        #     if res.archive_height < res.next_block:
-        #         # Exit the loop if the end of the period (or the blockchain's current height) is reached.
-        #         break
-
-        #     # Update the query to fetch the next set of data starting from the next block.
-        #     query.from_block = res.next_block
-
-    # def convert_hex_to_float(self, hex: str) -> float:
-    #     """
-    #     Converts hexadecimal values in a transaction dictionary to integers, skipping specific keys.
-
-    #     Args:
-    #     transaction (dict): A dictionary containing transaction data, where some values are hexadecimals.
-
-    #     Returns:
-    #     dict: A new dictionary with hexadecimals converted to integers, excluding specified keys.
-    #     """
-    #     # Only convert hex strings; leave other values as is
-    #     if isinstance(hex, str) and hex.startswith("0x"):
-    #         # Convert hex string to float
-    #         return float(int(hex, 16))
 
     def query_txs(self, address: Union[str, Dict[list, list]], period: int) -> pl.DataFrame:
         """ Query transactions for a given address and period.
