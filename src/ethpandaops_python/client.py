@@ -103,7 +103,7 @@ class Queries:
             blob_size,
             blob_empty_size
         FROM canonical_beacon_blob_sidecar
-        WHERE event_date_time > NOW() - INTERVAL '{n_days} DAYS'
+        WHERE slot_start_date_time > NOW() - INTERVAL '{n_days} DAYS'
         """
 
         # Query dataframes
