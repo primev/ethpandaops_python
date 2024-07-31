@@ -11,7 +11,7 @@ class Hypersync:
     client: HypersyncClient = field(
         default_factory=lambda: HypersyncClient(
             hypersync.ClientConfig(
-                url='http://1.backup.hypersync.xyz'
+                url='http://eth.hypersync.xyz'
             )
         )
     )
