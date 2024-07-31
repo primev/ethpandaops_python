@@ -127,7 +127,6 @@ class Queries:
                 query = f"""
                 SELECT
                     slot_start_date_time,
-                    event_date_time as block_process_time,
                     slot,
                     epoch,
                     hash,
@@ -144,7 +143,7 @@ class Queries:
                     blob_gas_fee_cap,
                     meta_network_name
                 FROM canonical_beacon_block_execution_transaction
-                WHERE event_date_time > NOW() - INTERVAL '{time} DAYS'
+                WHERE slot_start_date_time > NOW() - INTERVAL '{time} DAYS'
                 AND type = {type} AND meta_network_name = '{network}'
                 ORDER BY slot DESC
                 """
@@ -152,14 +151,14 @@ class Queries:
             case 'all':
                 query = f"""
                     SELECT * FROM canonical_beacon_block_execution_transaction
-                    WHERE event_date_time > NOW() - INTERVAL '{time} DAYS'
+                    WHERE slot_start_date_time > NOW() - INTERVAL '{time} DAYS'
                     AND meta_network_name = '{network}'
                     """
                 return self.client.query_df(query)
             case 'sample':
                 query = f"""
                     SELECT * FROM canonical_beacon_block_execution_transaction
-                    WHERE event_date_time > NOW() - INTERVAL '{time} DAYS'
+                    WHERE slot_start_date_time > NOW() - INTERVAL '{time} DAYS'
                     AND meta_network_name = '{network}'
                     LIMIT 1000
                     """
@@ -304,7 +303,6 @@ class Queries:
             case 'blob_propagation':
                 query = f"""
                 SELECT
-                    event_date_time,
                     slot_start_date_time,
                     propagation_slot_start_diff,
                     slot,
